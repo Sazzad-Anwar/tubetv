@@ -1,5 +1,8 @@
 name: Apk Build
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - main
 jobs:
   build-android:
     runs-on: ubuntu-latest
