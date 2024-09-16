@@ -1,17 +1,17 @@
-import { ThemedInput } from '@/components/ThemedInput'
-import { ThemedText } from '@/components/ThemedText'
-import { ThemedView } from '@/components/ThemedView'
-import { useThemeColor } from '@/hooks/useThemeColor'
-import useYoutubeMeta from '@/hooks/useYoutubeMeta'
-import FontAwesome from '@expo/vector-icons/FontAwesome'
-import { Stack, useRouter } from 'expo-router'
-import React, { useEffect, useState } from 'react'
-import { Dimensions, FlatList, TouchableOpacity } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import EmptySearch from '../components/search/EmptySearch'
-import LoaderSearch from '../components/search/Loader'
-import SearchCard from '../components/search/SearchCard'
-import useSearchStyle from '../components/search/useStyle'
+import { ThemedInput } from "@/components/ThemedInput";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import useYoutubeMeta from "@/hooks/useYoutubeMeta";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Stack, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Dimensions, FlatList, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import EmptySearch from "../components/search/EmptySearch";
+import LoaderSearch from "../components/search/Loader";
+import SearchCard from "../components/search/SearchCard";
+import useSearchStyle from "../components/search/useStyle";
 
 export default function Search() {
   const {
@@ -20,39 +20,39 @@ export default function Search() {
     isLoading,
     mutate,
     fetchMore,
-  } = useYoutubeMeta()
-  const [isEmpty, setIsEmpty] = useState(false)
-  const { height, width } = Dimensions.get('window')
-  const [search, setSearch] = useState('')
-  const styles = useSearchStyle()
-  const color = useThemeColor({}, 'icon')
-  const router = useRouter()
+  } = useYoutubeMeta();
+  const [isEmpty, setIsEmpty] = useState(false);
+  const { height } = Dimensions.get("window");
+  const [search, setSearch] = useState("");
+  const styles = useSearchStyle();
+  const color = useThemeColor({}, "icon");
+  const router = useRouter();
 
   useEffect(() => {
     if (search) {
-      setQuery(search)
+      setQuery(search);
     }
-  }, [search])
+  }, [search]);
 
   useEffect(() => {
-    let timeOut: any
-    if (!isLoading || typeof isLoading === 'undefined') {
+    let timeOut: any;
+    if (!isLoading || typeof isLoading === "undefined") {
       timeOut = setTimeout(() => {
-        setIsEmpty(channels?.length === 0 ? true : false)
-      }, 3000)
+        setIsEmpty(channels?.length === 0 ? true : false);
+      }, 3000);
     }
 
-    if (isLoading || typeof isLoading === 'undefined') {
-      clearTimeout(timeOut)
-      setIsEmpty(false)
+    if (isLoading || typeof isLoading === "undefined") {
+      clearTimeout(timeOut);
+      setIsEmpty(false);
     }
 
     if (channels.length > 0) {
-      setIsEmpty(false)
+      setIsEmpty(false);
     }
 
-    return () => clearTimeout(timeOut)
-  }, [channels.length])
+    return () => clearTimeout(timeOut);
+  }, [channels.length]);
 
   if (isLoading) {
     return (
@@ -64,31 +64,28 @@ export default function Search() {
             onPress={() => router.back()}
           >
             <ThemedText type="subtitle">
-              <FontAwesome
-                name="angle-left"
-                size={30}
-              />
+              <FontAwesome name="angle-left" size={25} />
             </ThemedText>
           </TouchableOpacity>
           <ThemedInput
+            value={search}
             clearButtonMode="always"
             style={styles.search}
-            placeholderTextColor={color}
             onChangeText={(text) => {
-              setSearch(text)
+              setSearch(text);
             }}
-            placeholder="Search..."
+            placeholder="Search by channel name..."
           />
         </ThemedView>
         <LoaderSearch />
       </SafeAreaView>
-    )
+    );
   }
 
   return (
     <SafeAreaView>
       <Stack.Screen
-        options={{ headerShown: false, animation: 'slide_from_right' }}
+        options={{ headerShown: false, animation: "slide_from_right" }}
       />
       <ThemedView style={styles.searchContainer}>
         <TouchableOpacity
@@ -96,10 +93,7 @@ export default function Search() {
           onPress={() => router.back()}
         >
           <ThemedText type="subtitle">
-            <FontAwesome
-              name="angle-left"
-              size={20}
-            />
+            <FontAwesome name="angle-left" size={25} />
           </ThemedText>
         </TouchableOpacity>
         <ThemedInput
@@ -107,7 +101,7 @@ export default function Search() {
           clearButtonMode="always"
           style={styles.search}
           onChangeText={(text) => {
-            setSearch(text)
+            setSearch(text);
           }}
           placeholder="Search by channel name..."
         />
@@ -118,7 +112,6 @@ export default function Search() {
         <ThemedView
           style={{
             height,
-            marginTop: 10,
           }}
         >
           <FlatList
@@ -135,16 +128,11 @@ export default function Search() {
             refreshing={isLoading || false}
             ListFooterComponent={() => isLoading && <LoaderSearch />}
             onRefresh={() => mutate(undefined, { revalidate: true })}
-            renderItem={({ item }) => (
-              <SearchCard
-                key={item?.id}
-                item={item}
-              />
-            )}
+            renderItem={({ item }) => <SearchCard key={item?.id} item={item} />}
             ListEmptyComponent={() => <LoaderSearch />}
           />
         </ThemedView>
       )}
     </SafeAreaView>
-  )
+  );
 }

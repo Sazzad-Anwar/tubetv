@@ -1,18 +1,15 @@
-import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
-import { memo } from 'react'
-import { TouchableOpacity } from 'react-native'
-import { useThemeColor } from '../../hooks/useThemeColor'
-import { ChannelType } from '../../types'
-import { ThemedText } from '../ThemedText'
-import { ThemedView } from '../ThemedView'
-import useSearchStyle from './useStyle'
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { memo } from "react";
+import { TouchableOpacity } from "react-native";
+import { ChannelType } from "../../types";
+import { ThemedText } from "../ThemedText";
+import { ThemedView } from "../ThemedView";
+import useSearchStyle from "./useStyle";
 
 const SearchCard = ({ item }: { item: ChannelType }) => {
-  const borderColor = useThemeColor({}, 'border')
-  const styles = useSearchStyle()
-
-  const router = useRouter()
+  const styles = useSearchStyle();
+  const router = useRouter();
 
   return (
     <TouchableOpacity
@@ -31,11 +28,7 @@ const SearchCard = ({ item }: { item: ChannelType }) => {
           />
         </ThemedView>
         <ThemedView style={{ gap: 0 }}>
-          <ThemedText
-            type="title"
-            style={styles.cardTitle}
-            numberOfLines={1}
-          >
+          <ThemedText type="title" style={styles.cardTitle} numberOfLines={1}>
             {item?.author_name}
           </ThemedText>
           <ThemedText
@@ -44,13 +37,13 @@ const SearchCard = ({ item }: { item: ChannelType }) => {
             numberOfLines={1}
           >
             {item && item?.title?.length > 40
-              ? item?.title.substring(0, 40) + '...'
+              ? item?.title.substring(0, 40) + "..."
               : item?.title}
           </ThemedText>
         </ThemedView>
       </ThemedView>
     </TouchableOpacity>
-  )
-}
+  );
+};
 
-export default memo(SearchCard)
+export default memo(SearchCard);
