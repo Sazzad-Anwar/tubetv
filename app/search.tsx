@@ -17,13 +17,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function Search() {
-  const { channels, setSearch: setQuery, isLoading } = useYoutubeMeta()
+  const { channels, setSearch: setQuery, isLoading, mutate } = useYoutubeMeta()
   const [isEmpty, setIsEmpty] = useState(false)
   const { height, width } = Dimensions.get('window')
   const [search, setSearch] = useState('')
   const color = useThemeColor({}, 'icon')
   const backgroundColor = useThemeColor({}, 'background')
-  const backgroundColor1 = useThemeColor({}, 'background1')
   const backgroundColor2 = useThemeColor({}, 'background2')
   const router = useRouter()
   const borderColor = useThemeColor({}, 'border')
@@ -228,42 +227,6 @@ export default function Search() {
     )
   }
 
-  if (isEmpty) {
-    return (
-      <SafeAreaView>
-        <Stack.Screen
-          options={{ headerShown: false, animation: 'slide_from_right' }}
-        />
-        <ThemedView
-          style={{
-            width,
-            height,
-            backgroundColor,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <ThemedView
-            style={{
-              backgroundColor,
-              height: height / 2,
-              alignItems: 'center',
-              gap: 10,
-            }}
-          >
-            <ThemedText
-              style={{ fontWeight: '400' }}
-              type="subtitle"
-            >
-              No channel found.
-            </ThemedText>
-          </ThemedView>
-        </ThemedView>
-      </SafeAreaView>
-    )
-  }
-
   return (
     <SafeAreaView>
       <Stack.Screen
@@ -291,60 +254,98 @@ export default function Search() {
           placeholder="Search by channel name..."
         />
       </ThemedView>
-      <ScrollView
-        style={{
-          height,
-          marginTop: 10,
-        }}
-      >
-        <FlashList
-          data={channels}
-          keyExtractor={(item) => item.key}
-          extraData={search}
-          contentContainerStyle={{ paddingBottom: 110 }}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              key={item.key}
-              onPress={() => router.push(`/news-video?id=${item?.id}`)}
+      {isEmpty ? (
+        <SafeAreaView>
+          <Stack.Screen
+            options={{ headerShown: false, animation: 'slide_from_right' }}
+          />
+          <ThemedView
+            style={{
+              width,
+              height,
+              backgroundColor,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <ThemedView
+              style={{
+                backgroundColor,
+                height: height / 2,
+                alignItems: 'center',
+                gap: 10,
+              }}
             >
-              <ThemedView
-                style={{ ...styles.titleContainer, ...styles.content }}
+              <ThemedText
+                style={{ fontWeight: '400' }}
+                type="subtitle"
               >
-                <ThemedView style={styles.roundedImageContainer}>
-                  <Image
-                    style={styles.roundedImage}
-                    source={{
-                      uri: item?.thumbnail_url,
-                      height: 50,
-                      width: 50,
-                    }}
-                  />
+                No channel found.
+              </ThemedText>
+            </ThemedView>
+          </ThemedView>
+        </SafeAreaView>
+      ) : (
+        <ScrollView
+          style={{
+            height,
+            marginTop: 10,
+          }}
+        >
+          <FlashList
+            data={channels}
+            keyExtractor={(item) => item.key}
+            extraData={search}
+            contentContainerStyle={{ paddingBottom: 110 }}
+            onEndReached={() => console.log('on end reached')}
+            onEndReachedThreshold={0.5}
+            refreshing={isLoading || false}
+            onRefresh={() => mutate(undefined, { revalidate: true })}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                key={item.key}
+                onPress={() => router.push(`/news-video?id=${item?.id}`)}
+              >
+                <ThemedView
+                  style={{ ...styles.titleContainer, ...styles.content }}
+                >
+                  <ThemedView style={styles.roundedImageContainer}>
+                    <Image
+                      style={styles.roundedImage}
+                      source={{
+                        uri: item?.thumbnail_url,
+                        height: 50,
+                        width: 50,
+                      }}
+                    />
+                  </ThemedView>
+                  <ThemedView style={{ gap: 0 }}>
+                    <ThemedText
+                      type="title"
+                      style={styles.cardTitle}
+                      numberOfLines={1}
+                    >
+                      {item?.author_name}
+                    </ThemedText>
+                    <ThemedText
+                      type="subtitle"
+                      style={styles.cardSubTitle}
+                      numberOfLines={1}
+                    >
+                      {item && item?.title?.length > 40
+                        ? item?.title.substring(0, 40) + '...'
+                        : item?.title}
+                    </ThemedText>
+                  </ThemedView>
                 </ThemedView>
-                <ThemedView style={{ gap: 0 }}>
-                  <ThemedText
-                    type="title"
-                    style={styles.cardTitle}
-                    numberOfLines={1}
-                  >
-                    {item?.author_name}
-                  </ThemedText>
-                  <ThemedText
-                    type="subtitle"
-                    style={styles.cardSubTitle}
-                    numberOfLines={1}
-                  >
-                    {item && item?.title?.length > 40
-                      ? item?.title.substring(0, 40) + '...'
-                      : item?.title}
-                  </ThemedText>
-                </ThemedView>
-              </ThemedView>
-            </TouchableOpacity>
-          )}
-          ListEmptyComponent={() => <Loader />}
-          estimatedItemSize={200}
-        />
-      </ScrollView>
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={() => <Loader />}
+            estimatedItemSize={200}
+          />
+        </ScrollView>
+      )}
     </SafeAreaView>
   )
 }

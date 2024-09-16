@@ -80,6 +80,7 @@ export default function VideoList({
           keyExtractor={(item) => item.key}
           contentContainerStyle={{ paddingBottom: 20 }}
           extraData={channels.length}
+          onEndReached={() => console.log('on end reached')}
           onEndReachedThreshold={0.5}
           renderItem={({ item }) => (
             <Pressable
