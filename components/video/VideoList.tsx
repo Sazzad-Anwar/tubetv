@@ -1,17 +1,9 @@
 import { ChannelType } from '@/types'
-import { ApiRoutes } from '@/utils/routes'
-import { FlashList } from '@shopify/flash-list'
-import { useRouter } from 'expo-router'
 import React from 'react'
-import {
-  Dimensions,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-} from 'react-native'
+import { Dimensions, FlatList, Platform, StyleSheet } from 'react-native'
 import { StyleProps } from 'react-native-reanimated'
 import { KeyedMutator } from 'swr'
+import { ThemedView } from '../ThemedView'
 import VideoListLoader from './Loader'
 import VideoCard from './VideoCard'
 import VideoListEmpty from './VideoListEmpty'
@@ -31,26 +23,15 @@ export default function VideoList({
   mutate,
   fetchMore,
 }: Props) {
-  const { width } = Dimensions.get('screen')
-  const router = useRouter()
+  const { width, height } = Dimensions.get('window')
   const isMobile = width < 768
   const isTablet = width >= 768 && width < 1024
   const isDesktop = width >= 1024
 
   const styles = StyleSheet.create({
     tvListContainer: {
-      height: 'auto',
+      height,
       marginBottom: Platform.OS === 'android' ? 60 : 20,
-    },
-    card: {
-      height: 'auto',
-      width: isMobile ? '100%' : isTablet ? '45%' : isDesktop ? '30%' : '100%',
-      shadowColor: '#000',
-      overflow: 'hidden',
-      marginTop: 5,
-      borderBottomRightRadius: 10,
-      borderBottomLeftRadius: 10,
-      marginBottom: 0,
     },
     cardBody: {
       paddingVertical: 8,
@@ -73,34 +54,25 @@ export default function VideoList({
   }
 
   return (
-    <ScrollView style={{ ...styles.tvListContainer, width, ...style }}>
+    <ThemedView style={{ ...styles.tvListContainer, width, ...style }}>
       {channels?.length > 0 && (
-        <FlashList
+        <FlatList
           data={channels}
           keyExtractor={(item) => item.key}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          extraData={channels.length}
-          onEndReached={() => console.log('on end reached')}
-          onEndReachedThreshold={0.5}
-          renderItem={({ item }) => (
-            <Pressable
-              key={item.key}
-              onPress={() =>
-                router.push(`${ApiRoutes.newsVideo}?id=${item?.id}`)
-              }
-              style={styles.card}
-            >
-              <VideoCard id={item?.id} />
-            </Pressable>
-          )}
+          maxToRenderPerBatch={8}
+          updateCellsBatchingPeriod={20}
+          initialNumToRender={8}
+          windowSize={21}
+          contentContainerStyle={{ paddingBottom: 150, flexGrow: 1 }}
+          onEndReachedThreshold={3}
+          renderItem={({ item }) => <VideoCard {...item} />}
           numColumns={isMobile ? 1 : isTablet ? 3 : 2}
-          centerContent={true}
-          refreshing={isLoading || false}
+          refreshing={!!isLoading}
           onRefresh={() => mutate?.(undefined, { revalidate: true })}
           ListEmptyComponent={() => <VideoListEmpty />}
-          estimatedItemSize={200}
+          onEndReached={() => fetchMore?.()}
         />
       )}
-    </ScrollView>
+    </ThemedView>
   )
 }

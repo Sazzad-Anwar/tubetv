@@ -10,20 +10,16 @@
       },
       "distribution": "internal",
       "autoIncrement": true,
-      "developmentClient": true
-    },
-    "productionAppStore": {
-      "android": {
-        "gradleCommand": ":app:assembleRelease"
-      },
-      "autoIncrement": true
+      "developmentClient": true,
+      "channel": "development"
     },
     "production": {
       "autoIncrement": true,
       "android": {
         "gradleCommand": ":app:assembleRelease",
         "buildType": "apk"
-      }
+      },
+      "channel": "production"
     }
   }
 }

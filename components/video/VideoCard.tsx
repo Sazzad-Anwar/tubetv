@@ -2,82 +2,91 @@ import useFavoriteItems from '@/hooks/useFavoriteItems'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { Image } from 'expo-image'
 import { Href, usePathname, useRouter } from 'expo-router'
-import React, { useEffect, useState } from 'react'
-import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native'
-import { YoutubeMeta, getYoutubeMeta } from 'react-native-youtube-iframe'
+import React, { memo } from 'react'
+import {
+  Dimensions,
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native'
+import { ChannelType } from '../../types'
+import { ApiRoutes } from '../../utils/routes'
 import { ThemedText } from '../ThemedText'
 import { ThemedView } from '../ThemedView'
 
-export default function VideoCard({ id }: { id: string }) {
+const VideoCard = (youtubeMeta: ChannelType) => {
   const { width } = Dimensions.get('screen')
-  const [youtubeMeta, setYoutubeMeta] = useState<YoutubeMeta>()
-  const { favoriteItems, toggleFavorite, getItems } = useFavoriteItems()
+  const { favoriteItems, toggleFavorite } = useFavoriteItems()
   const pathName = usePathname()
   const router = useRouter()
 
-  useEffect(() => {
-    const getMeta = async () => {
-      const meta = await getYoutubeMeta(id)
-      setYoutubeMeta(meta)
-    }
-    getMeta()
-    getItems()
-  }, [pathName])
-
   return (
-    <ThemedView style={{ position: 'relative' }}>
-      <Image
-        source={{ uri: youtubeMeta?.thumbnail_url }}
-        alt={youtubeMeta?.title}
-        style={{
-          ...styles.cardImage,
-          width,
-        }}
-      />
-      <ThemedView style={styles.cardBody}>
-        <ThemedView style={styles.roundedImageContainer}>
-          <Image
-            style={styles.roundedImage}
-            source={{ uri: youtubeMeta?.thumbnail_url, height: 50, width: 50 }}
-          />
-        </ThemedView>
-        <ThemedView style={{ gap: 0 }}>
-          <ThemedText
-            type="title"
-            style={styles.cardTitle}
-            numberOfLines={1}
-          >
-            {youtubeMeta?.author_name}
-          </ThemedText>
-          <ThemedText
-            type="subtitle"
-            style={styles.cardSubTitle}
-            numberOfLines={1}
-          >
-            {youtubeMeta && youtubeMeta?.title?.length > 40
-              ? youtubeMeta?.title.substring(0, 40) + '...'
-              : youtubeMeta?.title}
-          </ThemedText>
-        </ThemedView>
-      </ThemedView>
-      <TouchableOpacity style={styles.loveIcon}>
-        <Ionicons
-          name={
-            favoriteItems?.find((item) => item.id === id)
-              ? 'heart'
-              : 'heart-outline'
-          }
-          onPress={() => {
-            toggleFavorite(id as string)
-            router.replace(pathName as Href<String>)
+    <Pressable
+      onPress={() =>
+        router.push(`${ApiRoutes.newsVideo}?id=${youtubeMeta?.id}`)
+      }
+      style={styles.card}
+    >
+      <ThemedView style={{ position: 'relative' }}>
+        <Image
+          source={{ uri: youtubeMeta?.thumbnail_url }}
+          alt={youtubeMeta?.title}
+          style={{
+            ...styles.cardImage,
+            width,
           }}
-          size={35}
-          color="red"
         />
-      </TouchableOpacity>
-    </ThemedView>
+        <ThemedView style={styles.cardBody}>
+          <ThemedView style={styles.roundedImageContainer}>
+            <Image
+              style={styles.roundedImage}
+              source={{
+                uri: youtubeMeta?.thumbnail_url,
+                height: 50,
+                width: 50,
+              }}
+            />
+          </ThemedView>
+          <ThemedView style={{ gap: 0 }}>
+            <ThemedText
+              type="title"
+              style={styles.cardTitle}
+              numberOfLines={1}
+            >
+              {youtubeMeta?.author_name}
+            </ThemedText>
+            <ThemedText
+              type="subtitle"
+              style={styles.cardSubTitle}
+              numberOfLines={1}
+            >
+              {youtubeMeta && youtubeMeta?.title?.length > 40
+                ? youtubeMeta?.title.substring(0, 40) + '...'
+                : youtubeMeta?.title}
+            </ThemedText>
+          </ThemedView>
+        </ThemedView>
+        <TouchableOpacity style={styles.loveIcon}>
+          <Ionicons
+            name={
+              favoriteItems?.find((item) => item.id === youtubeMeta?.id)
+                ? 'heart'
+                : 'heart-outline'
+            }
+            onPress={() => {
+              toggleFavorite(youtubeMeta?.id as string)
+              router.replace(pathName as Href<String>)
+            }}
+            size={35}
+            color="red"
+          />
+        </TouchableOpacity>
+      </ThemedView>
+    </Pressable>
   )
 }
+
+export default memo(VideoCard)
 
 const styles = StyleSheet.create({
   cardBody: {
@@ -137,5 +146,15 @@ const styles = StyleSheet.create({
     margin: 0,
     fontSize: 12,
     fontWeight: '400',
+  },
+  card: {
+    height: 'auto',
+    width: '100%',
+    shadowColor: '#000',
+    overflow: 'hidden',
+    marginTop: 5,
+    borderBottomRightRadius: 10,
+    borderBottomLeftRadius: 10,
+    marginBottom: 0,
   },
 })

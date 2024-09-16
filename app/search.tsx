@@ -4,108 +4,29 @@ import { ThemedView } from '@/components/ThemedView'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import useYoutubeMeta from '@/hooks/useYoutubeMeta'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
-import { FlashList } from '@shopify/flash-list'
-import { Image } from 'expo-image'
 import { Stack, useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import {
-  Dimensions,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native'
+import { Dimensions, FlatList, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import EmptySearch from '../components/search/EmptySearch'
+import LoaderSearch from '../components/search/Loader'
+import SearchCard from '../components/search/SearchCard'
+import useSearchStyle from '../components/search/useStyle'
 
 export default function Search() {
-  const { channels, setSearch: setQuery, isLoading, mutate } = useYoutubeMeta()
+  const {
+    channels,
+    setSearch: setQuery,
+    isLoading,
+    mutate,
+    fetchMore,
+  } = useYoutubeMeta()
   const [isEmpty, setIsEmpty] = useState(false)
   const { height, width } = Dimensions.get('window')
   const [search, setSearch] = useState('')
+  const styles = useSearchStyle()
   const color = useThemeColor({}, 'icon')
-  const backgroundColor = useThemeColor({}, 'background')
-  const backgroundColor2 = useThemeColor({}, 'background2')
   const router = useRouter()
-  const borderColor = useThemeColor({}, 'border')
-
-  const styles = StyleSheet.create({
-    searchContainer: {
-      borderColor: 'transparent',
-      borderWidth: 1,
-      borderRadius: 10,
-      marginBottom: 0,
-      marginTop: 10,
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    search: {
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      fontSize: 18,
-      width: '100%',
-    },
-    backNavigation: {
-      width: 35,
-      height: 35,
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderRadius: 40,
-      justifyContent: 'center',
-      marginLeft: 10,
-    },
-    content: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 10,
-      paddingHorizontal: 20,
-      paddingVertical: 10,
-      borderBottomWidth: 1,
-      borderColor: borderColor,
-    },
-    titleContainer: {
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-    roundedImageContainer: {
-      height: 54,
-      width: 54,
-      backgroundColor: 'red',
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 35,
-    },
-    roundedImage: {
-      height: 50,
-      width: 50,
-      backgroundColor: 'red',
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 35,
-    },
-    cardTitle: {
-      padding: 0,
-      margin: 0,
-      fontSize: 16,
-      lineHeight: 16,
-      paddingBottom: 3,
-      fontWeight: '500',
-    },
-    cardSubTitle: {
-      padding: 0,
-      margin: 0,
-      fontSize: 12,
-      fontWeight: '400',
-    },
-  })
 
   useEffect(() => {
     if (search) {
@@ -133,69 +54,6 @@ export default function Search() {
     return () => clearTimeout(timeOut)
   }, [channels.length])
 
-  const Loader = () => {
-    return (
-      <ScrollView>
-        {Array.from({ length: 20 }).map((_, index) => (
-          <ThemedView
-            style={{
-              ...styles.content,
-              backgroundColor,
-              flexDirection: 'row',
-              justifyContent: 'flex-start',
-              alignItems: 'center',
-            }}
-            key={index}
-          >
-            <ThemedView
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingVertical: 10,
-              }}
-            >
-              <ThemedView
-                style={{
-                  height: 54,
-                  width: 54,
-                  borderRadius: 35,
-                  backgroundColor: backgroundColor2,
-                }}
-              />
-              <ThemedView style={{ flex: 1, marginLeft: 10, gap: 10 }}>
-                <ThemedView
-                  style={{
-                    ...styles.cardTitle,
-                    width: '50%',
-                    height: 25,
-                    borderRadius: 6,
-                    marginLeft: 10,
-                    borderWidth: 1,
-                    borderColor: 'transparent',
-                    backgroundColor: backgroundColor2,
-                  }}
-                />
-                <ThemedView
-                  style={{
-                    ...styles.cardTitle,
-                    width: '90%',
-                    height: 20,
-                    borderRadius: 6,
-                    marginLeft: 10,
-                    borderWidth: 1,
-                    borderColor: 'transparent',
-                    backgroundColor: backgroundColor2,
-                  }}
-                />
-              </ThemedView>
-            </ThemedView>
-          </ThemedView>
-        ))}
-      </ScrollView>
-    )
-  }
-
   if (isLoading) {
     return (
       <SafeAreaView>
@@ -222,7 +80,7 @@ export default function Search() {
             placeholder="Search..."
           />
         </ThemedView>
-        <Loader />
+        <LoaderSearch />
       </SafeAreaView>
     )
   }
@@ -255,96 +113,37 @@ export default function Search() {
         />
       </ThemedView>
       {isEmpty ? (
-        <SafeAreaView>
-          <Stack.Screen
-            options={{ headerShown: false, animation: 'slide_from_right' }}
-          />
-          <ThemedView
-            style={{
-              width,
-              height,
-              backgroundColor,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <ThemedView
-              style={{
-                backgroundColor,
-                height: height / 2,
-                alignItems: 'center',
-                gap: 10,
-              }}
-            >
-              <ThemedText
-                style={{ fontWeight: '400' }}
-                type="subtitle"
-              >
-                No channel found.
-              </ThemedText>
-            </ThemedView>
-          </ThemedView>
-        </SafeAreaView>
+        <EmptySearch />
       ) : (
-        <ScrollView
+        <ThemedView
           style={{
             height,
             marginTop: 10,
           }}
         >
-          <FlashList
+          <FlatList
             data={channels}
             keyExtractor={(item) => item.key}
             extraData={search}
             contentContainerStyle={{ paddingBottom: 110 }}
-            onEndReached={() => console.log('on end reached')}
-            onEndReachedThreshold={0.5}
+            onEndReachedThreshold={5}
+            maxToRenderPerBatch={10}
+            updateCellsBatchingPeriod={10}
+            initialNumToRender={10}
+            windowSize={21}
+            onEndReached={() => fetchMore?.()}
             refreshing={isLoading || false}
+            ListFooterComponent={() => isLoading && <LoaderSearch />}
             onRefresh={() => mutate(undefined, { revalidate: true })}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                key={item.key}
-                onPress={() => router.push(`/news-video?id=${item?.id}`)}
-              >
-                <ThemedView
-                  style={{ ...styles.titleContainer, ...styles.content }}
-                >
-                  <ThemedView style={styles.roundedImageContainer}>
-                    <Image
-                      style={styles.roundedImage}
-                      source={{
-                        uri: item?.thumbnail_url,
-                        height: 50,
-                        width: 50,
-                      }}
-                    />
-                  </ThemedView>
-                  <ThemedView style={{ gap: 0 }}>
-                    <ThemedText
-                      type="title"
-                      style={styles.cardTitle}
-                      numberOfLines={1}
-                    >
-                      {item?.author_name}
-                    </ThemedText>
-                    <ThemedText
-                      type="subtitle"
-                      style={styles.cardSubTitle}
-                      numberOfLines={1}
-                    >
-                      {item && item?.title?.length > 40
-                        ? item?.title.substring(0, 40) + '...'
-                        : item?.title}
-                    </ThemedText>
-                  </ThemedView>
-                </ThemedView>
-              </TouchableOpacity>
+              <SearchCard
+                key={item?.id}
+                item={item}
+              />
             )}
-            ListEmptyComponent={() => <Loader />}
-            estimatedItemSize={200}
+            ListEmptyComponent={() => <LoaderSearch />}
           />
-        </ScrollView>
+        </ThemedView>
       )}
     </SafeAreaView>
   )

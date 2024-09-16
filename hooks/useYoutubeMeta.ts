@@ -68,27 +68,25 @@ export default function useYoutubeMeta() {
   const fetchMore = async () => {
     try {
       if (fetchMoreToken) {
-        const { data } = await axios.post(apiUrl.split('?')[0], {
+        const { data, status } = await axios.post(apiUrl.split('?')[0], {
           context,
           query: apiUrl.split('=')[1],
           params: 'EgJAAQ==',
           continuation: fetchMoreToken,
         })
         if (
-          data?.onResponseReceivedCommands?.appendContinuationItemsAction
+          data &&
+          data?.onResponseReceivedCommands[0]?.appendContinuationItemsAction
             ?.continuationItems?.[0]?.itemSectionRenderer?.contents?.length
         ) {
           const contentData =
-            data?.onResponseReceivedCommands?.appendContinuationItemsAction
+            data?.onResponseReceivedCommands[0]?.appendContinuationItemsAction
               ?.continuationItems?.[0]?.itemSectionRenderer?.contents
-
           contentData.forEach((item: any) => {
             if (item?.videoRenderer?.videoId) {
               parseYoutubeMetaFromList(item?.videoRenderer?.videoId)
             }
           })
-
-          console.log('🚀 ~ contentData.forEach ~ contentData:', contentData)
         }
 
         if (
