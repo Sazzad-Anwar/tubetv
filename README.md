@@ -6,7 +6,7 @@ A learning purpose mobile application built for personal use only. My father who
 
 ## How to use
 
-- Download the APK file from [here](https://expo.dev/artifacts/eas/o4gCR5o7UWUv7Sq2s3JFQZ.apk)
+- Download the APK file from [here](https://expo.dev/artifacts/eas/8Ri2h4bzZiorkpnTnME7Vm.apk)
 - Install the APK file
 - Use the application
 
